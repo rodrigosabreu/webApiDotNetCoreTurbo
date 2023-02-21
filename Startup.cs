@@ -122,7 +122,7 @@ namespace WebApi
                 endpoints.MapControllers();
             });
 
-            app.UseSse();
+            //app.UseSse();
 
 
         }
