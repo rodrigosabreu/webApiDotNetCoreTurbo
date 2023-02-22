@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
 using System.Text;
@@ -16,10 +17,16 @@ namespace WebApi.Controllers
     [ApiController]
     public class NotificacaoController : ControllerBase
     {
+        private readonly IConnectionMultiplexer _redis;
 
         // uma coleção de conexões SSE
         private static ConcurrentDictionary<Guid, HttpResponse> _clients = new ConcurrentDictionary<Guid, HttpResponse>();
         private static ConcurrentDictionary<string, HttpResponse> _subscribers = new ConcurrentDictionary<string, HttpResponse>();
+
+        public NotificacaoController(IConnectionMultiplexer redis)
+        {
+            _redis = redis;
+        }
 
         [HttpGet]
         [Route("notificacao")]
@@ -39,6 +46,7 @@ namespace WebApi.Controllers
             Response.Headers.Add("Server", "mroth/sseserver");
             //Response.Headers.Add("Transfer-Encoding", "chunked");
 
+            int indice = 0;
             while (!cancellationToken.IsCancellationRequested)
             {
                 Random random = new Random();
@@ -46,7 +54,7 @@ namespace WebApi.Controllers
                 int indiceLacamento = random.Next(lacamentos.Length);
                 int indiceValores = random.Next(valores.Length);
                 int indiceSinal = random.Next(sinal.Length);
-
+                indice++;
                 Transacao transacao = new Transacao()
                 {
                     nome = nomes[indiceNome],
@@ -65,6 +73,10 @@ namespace WebApi.Controllers
                 await Task.Delay(5000);*/
 
                 var json = JsonConvert.SerializeObject(transacao);
+
+                var db = _redis.GetDatabase();
+                await db.StringSetAsync($"cliente_{indice}", json, TimeSpan.FromSeconds(60));
+
                 var message = $"data: {json}\n\n";
 
                 //var message = $"data: Cliente: {transacao.nome} - Tipo: {transacao.tipo_lancamento} - {transacao.valor} - {transacao.sinal}\n\n";
@@ -122,7 +134,6 @@ namespace WebApi.Controllers
                         valor = valores[indiceValores],
                         sinal = sinal[indiceSinal]
                     };
-
 
                     var json = JsonConvert.SerializeObject(transacao);
                     var message = $"data: {json}\n\n";

@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Refit;
+using StackExchange.Redis;
 using System;
 using System.Text;
 using WebApi.AWS;
@@ -94,6 +95,9 @@ namespace WebApi
             services.AddAutoMapper(typeof(Startup));
 
             services.AddCors();
+
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
+
 
         }
 
