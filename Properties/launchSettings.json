@@ -14,7 +14,7 @@
       "launchBrowser": true,
       //"launchUrl": "api/cep?cep=03106010",
       //"launchUrl": "api/kafka",
-      "launchUrl": "api/notificacao",
+      "launchUrl": "api/transacoes",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

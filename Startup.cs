@@ -96,7 +96,7 @@ namespace WebApi
 
             services.AddCors();
 
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
+            //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
 
 
         }
